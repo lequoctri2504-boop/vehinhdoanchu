@@ -298,13 +298,12 @@ btnStartGame.addEventListener('click', () => {
     socket.emit('start-game', roomCode);
 });
 
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        const text = chatInput.value.trim();
-        if (text) {
-            socket.emit('send-guess', text);
-            chatInput.value = '';
-        }
+document.getElementById('chat-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (text) {
+        socket.emit('send-guess', text);
+        chatInput.value = '';
     }
 });
 

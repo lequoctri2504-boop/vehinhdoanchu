@@ -65,7 +65,10 @@
                 <!-- Tin nhắn hiển thị ở đây -->
             </div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Nhập câu đoán..." />
+                <form id="chat-form" style="display: flex; gap: 5px; width: 100%; margin: 0;">
+                    <input type="text" id="chat-input" placeholder="Nhập câu đoán..." style="flex: 1; margin: 0;" autocomplete="off" />
+                    <button type="submit" class="btn-primary" style="width: auto; padding: 8px 15px; margin: 0;">Gửi</button>
+                </form>
             </div>
         </div>
     </div>
