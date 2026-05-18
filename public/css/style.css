@@ -390,17 +390,79 @@ input[type="color"] {
     #game-container {
         flex-direction: column;
         overflow-y: auto;
+        padding: 5px;
+        height: auto;
+        min-height: 100vh;
     }
-    #players-col {
-        width: 100%;
-        height: 150px;
-    }
-    #chat-col {
-        width: 100%;
-        height: 250px;
-    }
+
     #canvas-col {
-        height: 400px;
+        order: 1; /* Lên đầu */
+        height: 45vh; /* Chiếm 45% chiều cao */
         flex: none;
+        min-height: 320px;
+    }
+
+    #players-col {
+        order: 2; /* Đứng giữa */
+        width: 100%;
+        height: auto;
+    }
+    
+    .panel-header {
+        padding: 10px;
+    }
+
+    .panel-header h2 {
+        font-size: 1rem;
+    }
+
+    #players-list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .player-item {
+        flex: 0 0 auto;
+        min-width: 120px;
+        margin-bottom: 0;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        padding: 5px;
+    }
+
+    #chat-col {
+        order: 3; /* Dưới cùng */
+        width: 100%;
+        height: 35vh;
+        min-height: 250px;
+        flex: none;
+        margin-bottom: 10px;
+    }
+
+    .tools-bar {
+        flex-wrap: wrap; /* Cho phép rớt dòng */
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .colors {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .word-hint {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+    
+    .timer {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
     }
 }
