@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vẽ Hình Đoán Chữ - Chơi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="game-bg">
+    <div id="game-container">
+        <!-- Cột trái: Người chơi -->
+        <div id="players-col">
+            <div class="panel-header">
+                <h2>Phòng: <span id="display-room-code"></span></h2>
+                <p>Vòng <span id="round-info">1/3</span></p>
+                <button id="btnStartGame" class="btn-primary" style="display:none; width:100%; margin-top:10px;">Bắt Đầu</button>
+            </div>
+            <ul id="players-list">
+                <!-- Danh sách player sinh ra ở đây -->
+            </ul>
+        </div>
+
+        <!-- Cột giữa: Canvas -->
+        <div id="canvas-col">
+            <div class="top-bar">
+                <div class="timer" id="timer">60</div>
+                <div class="word-hint" id="word-hint">Đang chờ người chơi...</div>
+            </div>
+            <div class="canvas-wrapper">
+                <canvas id="drawing-board" width="800" height="600"></canvas>
+                <div id="overlay" class="overlay">
+                    <span id="overlay-text">Vui lòng đợi...</span>
+                </div>
+            </div>
+            <div class="tools-bar" id="tools-bar" style="display:none;">
+                <div class="colors">
+                    <div class="color-btn" style="background: #000000;" data-color="#000000"></div>
+                    <div class="color-btn" style="background: #ef4444;" data-color="#ef4444"></div>
+                    <div class="color-btn" style="background: #f59e0b;" data-color="#f59e0b"></div>
+                    <div class="color-btn" style="background: #10b981;" data-color="#10b981"></div>
+                    <div class="color-btn" style="background: #3b82f6;" data-color="#3b82f6"></div>
+                    <div class="color-btn" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+                    <div class="color-btn" style="background: #ec4899;" data-color="#ec4899"></div>
+                    <div class="color-btn" style="background: #ffffff; border:1px solid #ccc;" data-color="#ffffff"></div>
+                    <input type="color" id="color-picker" value="#000000" title="Chọn màu tùy ý">
+                </div>
+                <div class="brush-size">
+                    <input type="range" id="brush-size-slider" min="2" max="30" value="5">
+                </div>
+                <div class="actions">
+                    <button id="btn-eraser" class="btn-tool">Tẩy</button>
+                    <button id="btn-clear" class="btn-tool">Xóa hết</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Chat -->
+        <div id="chat-col">
+            <div class="panel-header">
+                <h2>Chat</h2>
+            </div>
+            <div id="chat-messages">
+                <!-- Tin nhắn hiển thị ở đây -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Nhập câu đoán..." />
+            </div>
+        </div>
+    </div>
+    
+    <!-- Màn hình kết thúc -->
+    <div id="end-screen" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>Kết thúc trò chơi!</h2>
+            <ul id="final-ranking"></ul>
+            <button onclick="window.location.href='/'" class="btn-primary">Về trang chủ</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vẽ Hình Đoán Chữ - Chờ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="lobby-bg">
+    <div class="lobby-container">
+        <h1 class="logo-title">🎨 Vẽ Hình Đoán Chữ</h1>
+        <div class="card">
+            <input type="text" id="playerName" placeholder="Nhập tên của bạn" maxlength="15" />
+            
+            <div class="action-buttons">
+                <button id="btnCreateRoom" class="btn-primary">Tạo Phòng Mới</button>
+            </div>
+            
+            <div class="divider"><span>HOẶC</span></div>
+            
+            <div class="join-section">
+                <input type="text" id="roomCode" placeholder="Mã phòng (6 ký tự)" maxlength="6" />
+                <button id="btnJoinRoom" class="btn-secondary">Vào Phòng</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/lobby.js"></script>
+</body>
+</html>
