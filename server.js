@@ -34,9 +34,7 @@ function removeAccents(str) {
 function checkGuess(guess, answer) {
     let normGuess = normalizeWord(guess);
     let normAnswer = normalizeWord(answer);
-    if (normGuess === normAnswer) return true;
-    if (removeAccents(normGuess) === removeAccents(normAnswer)) return true;
-    return false;
+    return normGuess === normAnswer;
 }
 
 function getHint(word, percentTimeRemaining) {
