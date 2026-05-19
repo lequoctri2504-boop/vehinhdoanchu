@@ -271,8 +271,11 @@ io.on('connection', (socket) => {
         const player = room.players.find(p => p.id === socket.id);
         if (!player) return;
 
-        if (room.players[room.currentDrawerIndex].id === socket.id) return;
-        if (room.guessedPlayers.includes(socket.id)) return;
+        if (room.players[room.currentDrawerIndex].id === socket.id || room.guessedPlayers.includes(socket.id)) {
+            // Chỉ gửi tin nhắn bình thường, không tính điểm đoán
+            io.to(roomCode).emit('chat-message', { name: player.name, text: guess });
+            return;
+        }
 
         if (checkGuess(guess, room.currentWord)) {
             room.guessedPlayers.push(socket.id);
