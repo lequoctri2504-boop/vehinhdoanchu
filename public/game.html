@@ -17,6 +17,28 @@
                 <p>Vòng <span id="round-info">1/3</span></p>
                 <button id="btnStartGame" class="btn-primary" style="display:none; width:100%; margin-top:10px;">Bắt Đầu</button>
             </div>
+            
+            <div id="room-settings" style="display:block; padding: 10px; background: #0f172a; border-radius: 8px; margin: 5px;">
+                <h3 style="font-size: 0.9rem; color: #f59e0b; margin-bottom: 5px;">Cài Đặt Phòng</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem;">
+                    <label>Thời gian:</label>
+                    <select id="setting-time" disabled style="background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px; padding: 2px 5px;">
+                        <option value="45">45 giây</option>
+                        <option value="60" selected>60 giây</option>
+                        <option value="80">80 giây</option>
+                        <option value="100">100 giây</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                    <label>Số vòng:</label>
+                    <select id="setting-rounds" disabled style="background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px; padding: 2px 5px;">
+                        <option value="2">2 vòng</option>
+                        <option value="3" selected>3 vòng</option>
+                        <option value="5">5 vòng</option>
+                    </select>
+                </div>
+            </div>
+
             <ul id="players-list">
                 <!-- Danh sách player sinh ra ở đây -->
             </ul>
@@ -79,6 +101,17 @@
             <h2>Kết thúc trò chơi!</h2>
             <ul id="final-ranking"></ul>
             <button onclick="window.location.href='/'" class="btn-primary">Về trang chủ</button>
+        </div>
+    </div>
+
+    <!-- Màn hình Chọn từ -->
+    <div id="word-selection-screen" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2>Chọn 1 từ để vẽ</h2>
+            <p style="color: #ef4444; font-weight: bold;">Tự động chọn sau: <span id="word-select-timer">15</span>s</p>
+            <div id="word-options" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <!-- Buttons sinh ra bằng JS -->
+            </div>
         </div>
     </div>
 

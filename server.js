@@ -9,14 +9,17 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Trạng thái server (Lưu trong RAM)
 const rooms = {};
 
 const wordList = [
-    "con mèo", "con chó", "con voi", "con thỏ", "con gà", "con bò", "con hổ", "con cá", "con chim", "con rắn", "con khỉ", "con heo", "con ngựa", "con vịt", "con ếch",
-    "cái nhà", "cái xe", "cái bàn", "cái ghế", "cái cây", "cái đèn", "cái túi", "cái nón", "cái kính", "cái điện thoại", "cái máy tính", "cái bút", "cái sách", "cái gương",
-    "trái táo", "trái chuối", "trái dưa hấu", "trái cam", "tô phở", "bánh mì", "ly cà phê", "bát cơm", "con tôm", "quả trứng",
-    "mặt trời", "ngôi sao", "đám mây", "ngọn núi", "con sóng", "cái cầu", "tòa nhà", "xe đạp", "máy bay", "con thuyền"
+    // Động vật
+    "con mèo", "con chó", "con voi", "con thỏ", "con gà", "con bò", "con hổ", "con cá", "con chim", "con rắn", "con khỉ", "con heo", "con ngựa", "con vịt", "con ếch", "chuột túi", "sư tử", "gấu trúc", "chim cánh cụt", "đà điểu", "con báo", "con cua", "con tôm", "con ốc", "cá sấu", "hươu cao cổ", "tê giác", "cá mập", "cá voi", "con mực",
+    // Đồ vật
+    "cái nhà", "cái xe", "cái bàn", "cái ghế", "cái cây", "cái đèn", "cái túi", "cái nón", "cái kính", "cái điện thoại", "cái máy tính", "cái bút", "cái sách", "cái gương", "tủ lạnh", "máy giặt", "tivi", "đồng hồ", "chìa khóa", "cái quạt", "cây đàn", "cái chổi", "bàn chải", "cái cốc", "cái bát", "cái đĩa", "đôi đũa", "cái thìa", "cái gối", "cái chăn",
+    // Thức ăn
+    "trái táo", "trái chuối", "trái dưa hấu", "trái cam", "tô phở", "bánh mì", "ly cà phê", "bát cơm", "quả trứng", "bánh xèo", "bánh chưng", "trà sữa", "kem", "kẹo mút", "sô cô la", "khoai tây chiên", "gà rán", "hộp sữa", "trái xoài", "trái nho", "trái dâu", "trái dứa", "củ cà rốt", "củ khoai",
+    // Khác
+    "mặt trời", "ngôi sao", "đám mây", "ngọn núi", "con sóng", "cái cầu", "tòa nhà", "xe đạp", "máy bay", "con thuyền", "trái đất", "mặt trăng", "ngọn lửa", "giọt nước", "tia chớp", "cơn mưa", "cái ô", "cầu vồng", "bông hoa", "chiếc lá", "con đường", "bệnh viện", "trường học", "công viên", "bể bơi", "sân bóng", "bác sĩ", "giáo viên", "công an", "cứu hỏa"
 ];
 
 function normalizeWord(word) {
@@ -24,7 +27,6 @@ function normalizeWord(word) {
     return word.toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
-// Chấp nhận bỏ qua dấu tiếng Việt (đơn giản hóa)
 function removeAccents(str) {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
 }
@@ -37,27 +39,22 @@ function checkGuess(guess, answer) {
     return false;
 }
 
-function getHint(word, timeRemaining) {
+function getHint(word, percentTimeRemaining) {
     let words = word.split(' ');
     let hint = words.map(w => '_'.repeat(w.length)).join(' ');
     
-    // Hint logic:
-    // Mặc định _ _ _
-    // Còn 30s: hiện chữ cái đầu
-    // Còn 15s: hiện chữ cái giữa/cuối tuỳ ý
     let hintArr = hint.split('');
     let wordArr = word.split('');
     
-    if (timeRemaining <= 30) {
-        hintArr[0] = wordArr[0]; // Chữ cái đầu của từ đầu tiên
+    // Mở chữ đầu tiên nếu còn dưới 50% thời gian
+    if (percentTimeRemaining <= 0.5) {
+        hintArr[0] = wordArr[0]; 
     }
-    if (timeRemaining <= 15 && word.length > 2) {
+    // Mở thêm chữ cái ở giữa nếu còn dưới 25% thời gian
+    if (percentTimeRemaining <= 0.25 && word.length > 2) {
         let mid = Math.floor(word.length / 2);
-        if (wordArr[mid] !== ' ') {
-             hintArr[mid] = wordArr[mid];
-        } else {
-             hintArr[mid+1] = wordArr[mid+1];
-        }
+        if (wordArr[mid] !== ' ') hintArr[mid] = wordArr[mid];
+        else hintArr[mid+1] = wordArr[mid+1];
     }
     return hintArr.join('');
 }
@@ -71,33 +68,74 @@ function generateRoomCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function startTurn(roomCode) {
+function get4RandomWords(usedWords) {
+    let available = wordList.filter(w => !usedWords.includes(w));
+    if (available.length < 4) {
+        usedWords.length = 0; // Reset nếu hết từ
+        available = [...wordList];
+    }
+    const shuffled = available.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4);
+}
+
+function startWordSelection(roomCode) {
     const room = rooms[roomCode];
     if (!room || room.state !== "playing") return;
 
     room.guessedPlayers = [];
-    room.currentWord = wordList[Math.floor(Math.random() * wordList.length)];
+    room.scoresForTurn = [100, 80, 60, 40, 20]; // Bậc điểm
+    
     const drawer = room.players[room.currentDrawerIndex];
+    const wordsToChoose = get4RandomWords(room.usedWords);
 
     io.to(roomCode).emit('new-turn', {
         drawerId: drawer.id,
         drawerName: drawer.name,
         round: room.round,
-        maxRounds: room.maxRounds
+        maxRounds: room.settings.rounds
     });
 
-    // Gửi từ cho người vẽ
-    io.to(drawer.id).emit('secret-word', room.currentWord);
+    io.to(drawer.id).emit('choose-word', { words: wordsToChoose });
 
-    // Bắt đầu đếm ngược 60s
-    room.timer = 60;
+    // 15 giây để chọn
+    room.timer = 15;
+    room.isChoosing = true;
+    room.currentWord = ""; // Clear current word
     
     clearInterval(room.interval);
     room.interval = setInterval(() => {
         room.timer--;
+        io.to(roomCode).emit('timer-update', { time: room.timer, isChoosing: true });
+
+        if (room.timer <= 0) {
+            // Tự động chọn ngẫu nhiên 1 trong 4 từ nếu quá giờ
+            const randomWord = wordsToChoose[Math.floor(Math.random() * wordsToChoose.length)];
+            startGameWithWord(roomCode, randomWord);
+        }
+    }, 1000);
+}
+
+function startGameWithWord(roomCode, word) {
+    const room = rooms[roomCode];
+    if (!room) return;
+    
+    clearInterval(room.interval);
+    room.isChoosing = false;
+    room.currentWord = word;
+    room.usedWords.push(word);
+
+    const drawer = room.players[room.currentDrawerIndex];
+    io.to(drawer.id).emit('secret-word', room.currentWord);
+
+    room.timer = room.settings.time;
+    const totalTime = room.settings.time;
+    
+    room.interval = setInterval(() => {
+        room.timer--;
         
-        let hint = getHint(room.currentWord, room.timer);
-        io.to(roomCode).emit('timer-update', { time: room.timer, hint: hint });
+        let percent = room.timer / totalTime;
+        let hint = getHint(room.currentWord, percent);
+        io.to(roomCode).emit('timer-update', { time: room.timer, hint: hint, isChoosing: false });
 
         if (room.timer <= 0) {
             endTurn(roomCode);
@@ -116,7 +154,7 @@ function endTurn(roomCode) {
     
     setTimeout(() => {
         nextTurn(roomCode);
-    }, 3000);
+    }, 4000); // Tăng tg nghỉ lên 4s để đọc kết quả
 }
 
 function nextTurn(roomCode) {
@@ -129,15 +167,14 @@ function nextTurn(roomCode) {
         room.round++;
     }
 
-    if (room.round > room.maxRounds) {
+    if (room.round > room.settings.rounds) {
         room.state = "ended";
         io.to(roomCode).emit('game-end', { players: room.players });
         return;
     }
 
-    startTurn(roomCode);
+    startWordSelection(roomCode);
 }
-
 
 io.on('connection', (socket) => {
     
@@ -145,14 +182,16 @@ io.on('connection', (socket) => {
         const code = generateRoomCode();
         rooms[code] = {
             code,
-            host: null, // Sẽ gán host khi join
+            host: null,
             players: [],
             state: "lobby",
+            settings: { time: 60, rounds: 3 },
             currentDrawerIndex: 0,
             currentWord: "",
+            usedWords: [],
             round: 1,
-            maxRounds: 3,
             timer: 0,
+            isChoosing: false,
             guessedPlayers: []
         };
         socket.emit('room-created', { code });
@@ -170,17 +209,26 @@ io.on('connection', (socket) => {
             io.to(data.code).emit('room-update', getSafeRoom(room));
             
             if(room.state === "playing"){
-               // Gửi state hiện tại cho người vào sau
                socket.emit('game-started');
                socket.emit('new-turn', {
                    drawerId: room.players[room.currentDrawerIndex].id,
                    drawerName: room.players[room.currentDrawerIndex].name,
                    round: room.round,
-                   maxRounds: room.maxRounds
+                   maxRounds: room.settings.rounds
                });
             }
         } else {
             socket.emit('error-msg', 'Phòng không tồn tại!');
+        }
+    });
+
+    socket.on('update-settings', (data) => {
+        const roomCode = Array.from(socket.rooms).find(r => r !== socket.id);
+        const room = rooms[roomCode];
+        if (room && room.host === socket.id && room.state === "lobby") {
+            room.settings.time = data.time || 60;
+            room.settings.rounds = data.rounds || 3;
+            io.to(roomCode).emit('room-update', getSafeRoom(room));
         }
     });
 
@@ -189,7 +237,15 @@ io.on('connection', (socket) => {
         if (room && room.host === socket.id && room.players.length >= 2) {
             room.state = "playing";
             io.to(code).emit('game-started');
-            startTurn(code);
+            startWordSelection(code);
+        }
+    });
+
+    socket.on('word-chosen', (word) => {
+        const roomCode = Array.from(socket.rooms).find(r => r !== socket.id);
+        const room = rooms[roomCode];
+        if (room && room.isChoosing && room.players[room.currentDrawerIndex].id === socket.id) {
+            startGameWithWord(roomCode, word);
         }
     });
 
@@ -210,26 +266,27 @@ io.on('connection', (socket) => {
     socket.on('send-guess', (guess) => {
         const roomCode = Array.from(socket.rooms).find(r => r !== socket.id);
         const room = rooms[roomCode];
-        if (!room || room.state !== "playing") return;
+        if (!room || room.state !== "playing" || room.isChoosing) return;
 
         const player = room.players.find(p => p.id === socket.id);
         if (!player) return;
 
-        // Nếu người đang vẽ, không cho đoán
         if (room.players[room.currentDrawerIndex].id === socket.id) return;
-        
-        // Đã đoán đúng rồi, không cho đoán tiếp
         if (room.guessedPlayers.includes(socket.id)) return;
 
         if (checkGuess(guess, room.currentWord)) {
             room.guessedPlayers.push(socket.id);
-            player.score += 100;
-            room.players[room.currentDrawerIndex].score += 50;
+            
+            // Tính điểm: Người đoán lấy điểm từ mảng bậc điểm, nếu hết lấy 20
+            const earnedPoints = room.scoresForTurn.shift() || 20;
+            player.score += earnedPoints;
+            
+            // Người vẽ được 20đ cho mỗi người đoán đúng
+            room.players[room.currentDrawerIndex].score += 20;
             
             io.to(roomCode).emit('correct-guess', { name: player.name });
             io.to(roomCode).emit('room-update', getSafeRoom(room));
 
-            // Kiểm tra xem tất cả người đoán đã đúng chưa (trừ người vẽ)
             if (room.guessedPlayers.length === room.players.length - 1) {
                 endTurn(roomCode);
             }
@@ -263,7 +320,7 @@ io.on('connection', (socket) => {
                              room.round++;
                         }
                         if(room.players.length > 1) {
-                            startTurn(code);
+                            startWordSelection(code);
                         } else {
                             room.state = "ended";
                             io.to(code).emit('system-message', `Không đủ người chơi.`);

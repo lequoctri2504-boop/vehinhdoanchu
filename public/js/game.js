@@ -24,6 +24,13 @@ const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const roundInfo = document.getElementById('round-info');
 
+// Settings Elements
+const settingTime = document.getElementById('setting-time');
+const settingRounds = document.getElementById('setting-rounds');
+const wordSelectScreen = document.getElementById('word-selection-screen');
+const wordSelectTimer = document.getElementById('word-select-timer');
+const wordOptions = document.getElementById('word-options');
+
 // Canvas Setup
 const canvas = document.getElementById('drawing-board');
 const ctx = canvas.getContext('2d');
@@ -75,6 +82,10 @@ socket.on('room-update', (room) => {
 
     // Show start button for host if in lobby and >= 2 players
     if (room.state === 'lobby' && room.host === socket.id) {
+        // Kích hoạt settings cho host
+        settingTime.disabled = false;
+        settingRounds.disabled = false;
+
         if (room.players.length >= 2) {
             btnStartGame.style.display = 'block';
             overlayText.innerText = "Chờ chủ phòng bắt đầu...";
@@ -82,7 +93,24 @@ socket.on('room-update', (room) => {
             btnStartGame.style.display = 'none';
             overlayText.innerText = "Đang chờ người chơi...";
         }
+    } else {
+        settingTime.disabled = true;
+        settingRounds.disabled = true;
     }
+
+    // Sync settings
+    if (room.settings) {
+        if (settingTime.value != room.settings.time && document.activeElement !== settingTime) settingTime.value = room.settings.time;
+        if (settingRounds.value != room.settings.rounds && document.activeElement !== settingRounds) settingRounds.value = room.settings.rounds;
+    }
+});
+
+// Host thay đổi settings
+settingTime.addEventListener('change', () => {
+    socket.emit('update-settings', { time: parseInt(settingTime.value), rounds: parseInt(settingRounds.value) });
+});
+settingRounds.addEventListener('change', () => {
+    socket.emit('update-settings', { time: parseInt(settingTime.value), rounds: parseInt(settingRounds.value) });
 });
 
 socket.on('game-started', () => {
@@ -90,28 +118,60 @@ socket.on('game-started', () => {
     addChatMsg('system', 'Hệ thống', 'Trò chơi bắt đầu!');
 });
 
+socket.on('choose-word', (data) => {
+    isMyTurn = true; // Mình sẽ là người vẽ
+    overlay.style.display = 'none';
+    toolsBar.style.display = 'flex';
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa bảng
+
+    wordSelectScreen.style.display = 'flex';
+    wordOptions.innerHTML = '';
+    data.words.forEach(word => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-primary';
+        btn.innerText = word;
+        btn.onclick = () => {
+            wordSelectScreen.style.display = 'none';
+            socket.emit('word-chosen', word);
+        };
+        wordOptions.appendChild(btn);
+    });
+});
+
 socket.on('new-turn', (data) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Xóa bảng khi qua lượt mới
     roundInfo.innerText = `${data.round}/${data.maxRounds}`;
     isMyTurn = (data.drawerId === socket.id);
     
+    wordSelectScreen.style.display = 'none';
+
     if (isMyTurn) {
         overlay.style.display = 'none';
         toolsBar.style.display = 'flex';
-        wordHint.innerText = "Chờ nhận từ khóa...";
     } else {
-        overlay.style.display = 'none';
+        overlay.style.display = 'flex'; // Dùng overlay cho chế độ người xem
+        overlayText.innerText = `Đang đợi ${data.drawerName} chọn từ...`;
         toolsBar.style.display = 'none';
-        wordHint.innerText = "Đang vẽ...";
+        wordHint.innerText = "Đang chờ...";
         addChatMsg('system', 'Hệ thống', `Đến lượt của ${data.drawerName} vẽ!`);
     }
 });
 
 socket.on('secret-word', (word) => {
     wordHint.innerText = `Vẽ: ${word}`;
+    overlay.style.display = 'none'; // Ẩn overlay nếu là người khác
 });
 
 socket.on('timer-update', (data) => {
+    if (data.isChoosing) {
+        wordSelectTimer.innerText = data.time;
+        if (!isMyTurn) {
+            timerEl.innerText = data.time; // Hiển thị đồng hồ đếm ngược chờ chọn
+            wordHint.innerText = "Đang chọn từ...";
+        }
+        return;
+    }
+
     timerEl.innerText = data.time;
     if (data.time <= 10) {
         timerEl.style.boxShadow = "0 0 20px rgba(239, 68, 68, 1)";
@@ -121,6 +181,7 @@ socket.on('timer-update', (data) => {
     
     if (!isMyTurn) {
         wordHint.innerText = data.hint.split('').join(' '); // Thêm khoảng trắng cho dễ nhìn
+        overlay.style.display = 'none'; // Ẩn chữ đang chờ...
     }
 });
 
