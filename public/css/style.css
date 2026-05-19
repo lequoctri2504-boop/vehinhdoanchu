@@ -451,12 +451,13 @@ input[type="color"] {
         display: flex;
         flex-direction: column;
         margin-bottom: 0;
-        min-height: 100px;
+        min-height: 0; /* Cực kỳ quan trọng: Ép flex container co lại */
     }
 
     #chat-messages {
         flex: 1;
         overflow-y: auto;
+        min-height: 0; /* Cực kỳ quan trọng: Ngăn không cho khối này phình to đẩy ô input xuống */
     }
 
     .tools-bar {
