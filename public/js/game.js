@@ -115,6 +115,8 @@ settingRounds.addEventListener('change', () => {
 
 socket.on('game-started', () => {
     btnStartGame.style.display = 'none';
+    const settingsPanel = document.getElementById('room-settings');
+    if (settingsPanel) settingsPanel.style.display = 'none';
     addChatMsg('system', 'Hệ thống', 'Trò chơi bắt đầu!');
 });
 
